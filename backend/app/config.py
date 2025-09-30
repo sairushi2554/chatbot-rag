@@ -29,18 +29,18 @@ class Settings(BaseSettings):
     OLLAMA_CHAT_MODEL: str = os.getenv("LLM_MODEL", "llama2")
     
     # Paths
-    DOCUMENTS_PATH: str = os.getenv("DOCUMENTS_PATH", "./documents")
-    VECTOR_STORE_PATH: str = os.getenv("VECTOR_STORE_PATH", "./vector_store")
+    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    DOCUMENTS_DIR: str = os.path.join(BASE_DIR, 'documents')
+    VECTOR_STORE_PATH: str = os.path.join(BASE_DIR, 'vector_store')
     
     # OpenAI settings (kept for reference, not used in this setup)
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-ada-002"
     OPENAI_CHAT_MODEL: str = "gpt-3.5-turbo"
     
-    # Document settings
-    DOCUMENTS_DIR: str = "documents"
-    CHUNK_SIZE: int = 1000
-    CHUNK_OVERLAP: int = 200
+    # Document processing settings
+    CHUNK_SIZE: int = os.getenv("CHUNK_SIZE", 1000)
+    CHUNK_OVERLAP: int = os.getenv("CHUNK_OVERLAP", 200)
     
     # CORS settings
     ALLOWED_ORIGINS: list = ["*"]

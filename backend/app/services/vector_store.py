@@ -66,19 +66,46 @@ class VectorStoreManager:
     def load_vector_store(self, path: str) -> None:
         """Load an existing vector store from disk."""
         from langchain.vectorstores import FAISS
+        from langchain.vectorstores.faiss import DistanceStrategy
+        
         if not os.path.exists(path):
             raise FileNotFoundError(f"Vector store not found at: {path}")
-            
-        self.vector_store = FAISS.load_local(path, self.embeddings)
+        
+        try:
+            # Try loading with the latest FAISS API
+            self.vector_store = FAISS.load_local(
+                folder_path=path,
+                embeddings=self.embeddings,
+                allow_dangerous_deserialization=True  # Required for security reasons
+            )
+        except Exception as e:
+            # If that fails, try the older method
+            try:
+                self.vector_store = FAISS.load_local(
+                    folder_path=path,
+                    embeddings=self.embeddings
+                )
+            except Exception as e2:
+                logger.error(f"Failed to load vector store: {str(e2)}")
+                raise
         
     def save_vector_store(self, path: str) -> None:
         """Save the current vector store to disk."""
         if not self.vector_store:
             raise ValueError("No vector store initialized")
+        
+        try:
+            # Create directory if it doesn't exist
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        self.vector_store.save_local(path)
+            # Save with the latest FAISS API
+            self.vector_store.save_local(
+                folder_path=path,
+                index_name="index"  # Standard name for FAISS index files
+            )
+        except Exception as e:
+            logger.error(f"Failed to save vector store: {str(e)}")
+            raise
         
     def similarity_search(self, query: str, k: int = 4) -> List[Document]:
         """Search for similar documents to the query."""

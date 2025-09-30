@@ -5,9 +5,9 @@ python-dotenv==1.0.0
 python-multipart==0.0.6
 
 # LangChain
-typing-extensions==4.9.0  # Pinned to version compatible with unstructured
 langchain==0.0.339
 langchain-community==0.0.14
+langchain-core==0.1.14
 
 # Embeddings and Vector Store
 sentence-transformers==2.2.2
@@ -28,6 +28,12 @@ passlib[bcrypt]==1.7.4
 unstructured==0.12.6
 pypdf>=3.0.0
 docx2txt>=0.8
+
+# Additional Dependencies
+typing-extensions>=4.5.0
+numpy>=1.24.0
+torch>=2.0.0
+transformers>=4.30.0
 
 # Platform-specific dependencies
 python-magic>=0.4.27; sys_platform == "linux" or sys_platform == "darwin"

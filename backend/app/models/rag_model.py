@@ -50,16 +50,31 @@ class RAGModel:
         
     def load_vector_store(self, path: str) -> None:
         """Load an existing vector store from disk."""
-        self.vector_store = FAISS.load_local(
-            path, 
-            self.embeddings,
-            allow_dangerous_deserialization=True
-        )
+        try:
+            # Simplified loading method
+            self.vector_store = FAISS.load_local(
+                folder_path=path,
+                embeddings=self.embeddings
+            )
+        except Exception as e:
+            logger.error(f"Failed to load vector store: {str(e)}")
+            raise
         
     def save_vector_store(self, path: str) -> None:
         """Save the current vector store to disk."""
-        if self.vector_store:
-            self.vector_store.save_local(path)
+        if not self.vector_store:
+            raise ValueError("No vector store to save")
+            
+        try:
+            # Create directory if it doesn't exist
+            import os
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            
+            # Simplified save operation
+            self.vector_store.save_local(folder_path=path)
+        except Exception as e:
+            logger.error(f"Failed to save vector store: {str(e)}")
+            raise
             
     def initialize_qa_chain(self) -> None:
         """Initialize the QA chain with the current vector store."""
@@ -80,13 +95,13 @@ class RAGModel:
             input_variables=["context", "question"]
         )
         
-        # Initialize the QA chain
+        # Initialize the QA chain with updated parameters
         self.qa_chain = RetrievalQA.from_chain_type(
             llm=self._get_llm(),
             chain_type="stuff",
             retriever=self.vector_store.as_retriever(),
-            chain_type_kwargs={"prompt": PROMPT},
-            return_source_documents=True
+            return_source_documents=True,
+            chain_type_kwargs={"prompt": PROMPT}
         )
     
     def query(self, question: str) -> Dict[str, Any]:
